@@ -1,0 +1,15 @@
+This is the SAP BW4/HANA data warehouse product 'documentation' produced by SAP. It's known to be inconsistent.
+https://help.sap.com/viewer/06e872f914a44d77b6c692b0273ca400/2.0.8/en-US/7994f4977bf7469ea8fa820777bcc792.html
+
+This is a randomer website that has SAP R/3 (the ~2008 product) base tables on it.
+https://www.leanx.eu/en/sap/table/aufk.html
+
+there was another randomer site that had the actual table names, so that they could be looked up, and that's what made the spreadsheet.
+
+
+https://realpython.com/python-web-scraping-practical-introduction/
+
+https://realpython.com/beautiful-soup-web-scraper-python/
+
+
+
