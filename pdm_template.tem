@@ -1,0 +1,150 @@
+<root>
+        <!-- /c:DefaultDiagram -->
+        <c:Domains>
+{% for key, domain in Domains.items() %}
+          <o:PhysicalDomain Id="{{domain.Id}}">
+            <a:ObjectID>{{domain.ObjectID}}</a:ObjectID>
+            <a:Name>{{domain.Name}}</a:Name>
+            <a:Code>{{domain.Code}}</a:Code>
+            <a:CreationDate>{{domain.CreationDate}}</a:CreationDate>
+            <a:Creator>{{domain.Creator}}</a:Creator>
+            <a:ModificationDate>{{domain.ModificationDate}}</a:ModificationDate>
+            <a:Modifier>{{domain.Modifier}}</a:Modifier>
+            <a:Comment>{{domain.Comment}}</a:Comment>
+            <a:DataType>{{domain.DataType}}</a:DataType>
+{%   if 'Length' in domain %}
+            <a:Length>{{domain.Length}}</a:Length>
+{%   endif %}
+{%   if 'Precision' in domain %}
+            <a:Precision>{{domain.Precision}}</a:Precision>
+{%   endif %}
+          </o:PhysicalDomain>
+{% endfor %}
+        </c:Domains>
+        <c:Tables>
+{% for key, table in Tables.items() %}
+          <o:Table Id="{{table.Id}}">
+            <a:ObjectID>{{table.ObjectID}}</a:ObjectID>
+            <a:Name>{{table.Name}}</a:Name>
+            <a:Code>{{table.Code}}</a:Code>
+            <a:CreationDate>{{table.CreationDate}}</a:CreationDate>
+            <a:Creator>{{table.Creator}}</a:Creator>
+            <a:ModificationDate>{{table.ModificationDate}}</a:ModificationDate>
+            <a:Modifier>{{table.Modifier}}</a:Modifier>
+            <a:Comment>{{table.Comment}}</a:Comment>
+            <a:TotalSavingCurrency/>
+            <a:Description>{{table.Description}}</a:Description>
+            <a:Annotation>{{table.Annotation}}</a:Annotation>
+{%  if 'Columns' in table %}
+            <c:Columns>
+{%  for key, column in table.Columns.items() %}
+              <o:Column Id="{{column.Id}}">
+                <a:ObjectID>{{column.ObjectID}}</a:ObjectID>
+                <a:Name>{{column.Name}}</a:Name>
+                <a:Code>{{column.Code}}</a:Code>
+                <a:CreationDate>{{column.CreationDate}}</a:CreationDate>
+                <a:Creator>{{column.Creator}}</a:Creator>
+                <a:ModificationDate>{{column.ModificationDate}}</a:ModificationDate>
+                <a:Modifier>{{column.Modifier}}</a:Modifier>
+                <a:Comment>{{column.Comment}}</a:Comment>
+{%      if (column.isEnum | int == 1) and ('Enums' in column) %}
+                <a:ListOfValues>
+{%-       for code, description in column.Enums.items() -%}
+{% if loop.last %}{{code}}	{{description -}}{% else %}{{code}}	{{description}}
+{% endif %}{% endfor -%}
+                </a:ListOfValues>
+{%      endif %}
+{%      if column.Domain != '' %}
+                <!-- referred Domain: {{column.Domain}} -->
+                <a:DataType>{{Domains[column.Domain].DataType}}</a:DataType>
+{%        if ('Length' in Domains[column.Domain]) and (Domains[column.Domain].Length | int > 0) %}
+                <a:Length>{{Domains[column.Domain].Length}}</a:Length>
+{%        endif %}
+{%        if ('Precision' in Domains[column.Domain]) and (Domains[column.Domain].Precision | int > 0) %}
+                <a:Precision>{{Domains[column.Domain].Precision}}</a:Precision>
+{%        endif %}
+                <c:Domain>
+                  <o:PhysicalDomain Ref="{{Domains[column.Domain].Id}}"/>
+                </c:Domain>
+{%      else %}
+                <a:DataType>{{column.dataType}}</a:DataType>
+{%        if column.Length | int > 0 %}
+                <a:Length>{{column.Length}}</a:Length>
+{%        endif %}
+{%        if column.Precision | int > 0 %}
+                <a:Precision>{{column.Precision}}</a:Precision>
+{%        endif %}
+{%      endif %}
+{%    endfor %}
+              </o:Column>
+{%  endif %}
+            </c:Columns>
+{%  if 'PrimaryKeyDict' in table %}
+            <c:Keys>
+              <o:Key Id="{{table.PrimaryKeyDict.Id}}">
+                <a:ObjectID>{{table.ObjectID}}</a:ObjectID>
+                <a:Name>{{table.Name}}</a:Name>
+                <a:Code>{{table.Code}}</a:Code>
+                <a:CreationDate>{{table.CreationDate}}</a:CreationDate>
+                <a:Creator>{{table.Creator}}</a:Creator>
+                <a:ModificationDate>{{table.ModificationDate}}</a:ModificationDate>
+                <a:Modifier>{{table.Modifier}}</a:Modifier>
+                <c:Key.Columns>
+{%    for fieldname in table.PrimaryKeyDict.pkFieldName %}
+                  <!-- referred column: {{fieldname}} -->
+                  <o:Column Ref="{{table.Columns[fieldname].Id}}"/>
+{%    endfor %}
+                </c:Key.Columns>
+              </o:Key>
+            </c:Keys>
+            <c:PrimaryKey>
+              <o:Key Ref="{{table.PrimaryKeyDict.Id}}"/>
+            </c:PrimaryKey>
+{%  endif %}
+          </o:Table>
+{% endfor %}
+        </c:Tables>            
+        <c:References>
+{% for reference in References %}
+          <o:Reference Id="{{reference.ReferenceId}}">
+            <a:ObjectID>{{reference.ReferenceObjectID}}</a:ObjectID>
+            <a:Name>{{reference.Name}}</a:Name>
+            <a:Code>{{reference.Code}}</a:Code>
+            <a:CreationDate>{{reference.CreationDate}}</a:CreationDate>
+            <a:Creator>{{reference.Creator}}</a:Creator>
+            <a:ModificationDate>{{reference.ModificationDate}}</a:ModificationDate>
+            <a:Modifier>{{reference.Modifier}}</a:Modifier>
+            <a:Cardinality>0..*</a:Cardinality>
+            <a:UpdateConstraint>1</a:UpdateConstraint>
+            <a:DeleteConstraint>1</a:DeleteConstraint>
+            <a:ForeignKeyConstraintName>FK_{{reference.Name}}</a:ForeignKeyConstraintName>
+            <c:ParentTable>
+              <!-- referred Table: {{reference.parentTableName}} -->
+              <o:Table Ref="{{Tables[reference.parentTableName].Id}}"/>
+            </c:ParentTable>
+            <c:ChildTable>
+              <!-- referred Table: {{reference.childTableName}} -->
+              <o:Table Ref="{{Tables[reference.childTableName].Id}}"/>
+            </c:ChildTable>
+            <c:Joins>
+              <o:ReferenceJoin Id="{{reference.ReferenceJoinId}}">
+                <a:ObjectID>{{reference.ReferenceJoinObjectID}}</a:ObjectID>
+                <a:CreationDate>{{reference.CreationDate}}</a:CreationDate>
+                <a:Creator>{{reference.Creator}}</a:Creator>
+                <a:ModificationDate>{{reference.ModificationDate}}</a:ModificationDate>
+                <a:Modifier>{{reference.Modifier}}</a:Modifier>
+                <c:Object1>
+                  <!-- referred Column: {{reference.parentTableField}} -->
+                  <o:Column Ref="{% if (reference.parentTableName in Tables) and (reference.parentTableField in Tables[reference.parentTableName].Columns) %}{{Tables[reference.parentTableName].Columns[reference.parentTableField].Id}}{% else %}XX{% endif %}"/>
+                </c:Object1>
+                <c:Object2>
+                  <!-- referred Column: {{reference.childFieldName}} -->
+                  <o:Column Ref="{% if (reference.childTableName in Tables) and (reference.childFieldName in Tables[reference.childTableName].Columns) %}{{Tables[reference.childTableName].Columns[reference.childFieldName].Id}}{% else %}XX{% endif %}"/>
+                </c:Object2>
+              </o:ReferenceJoin>
+            </c:Joins>
+          </o:Reference>
+{% endfor %}
+        </c:References>
+      <!-- c:DefaultGroups -->
+      </root>
